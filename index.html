@@ -13,12 +13,13 @@
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.css" />
-<link rel="stylesheet" href="style.css?v=5">
+<link rel="stylesheet" href="style.css?v=6">
 </head>
 <body>
   <div class="app">
     <header class="app-header">
       <p class="today-date" id="todayDate"></p>
+      <button type="button" id="syncBtn" class="sync-btn">동기화</button>
     </header>
 
     <nav class="tabs" id="tabs">
@@ -51,6 +52,25 @@
     </main>
   </div>
 
+  <div id="syncModal" class="modal hidden">
+    <div class="modal-card">
+      <h3>기기 간 동기화</h3>
+      <p class="hint">이 코드를 다른 기기에서 입력하면 같은 목록을 볼 수 있어요. 코드를 아는 사람은 누구나 접근할 수 있으니 남에게 공유하지 마세요.</p>
+      <div class="sync-code-row">
+        <span id="syncCodeDisplay" class="sync-code"></span>
+        <button type="button" id="syncCopyBtn" class="btn-secondary">복사</button>
+      </div>
+      <p class="hint" id="syncStatus"></p>
+      <div class="sync-join-row">
+        <input type="text" id="syncJoinInput" placeholder="다른 기기 코드 입력">
+        <button type="button" id="syncJoinBtn" class="btn-primary">연결</button>
+      </div>
+      <div class="modal-actions">
+        <button id="syncCloseBtn" class="btn-secondary" type="button">닫기</button>
+      </div>
+    </div>
+  </div>
+
   <div id="dateModal" class="modal hidden">
     <div class="modal-card">
       <h3>언제 할까요?</h3>
@@ -63,7 +83,7 @@
     </div>
   </div>
 
-  <script src="app.js"></script>
+  <script type="module" src="app.js"></script>
   <script>
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {

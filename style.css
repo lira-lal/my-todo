@@ -41,6 +41,69 @@ body {
 
 .app-header {
   margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.sync-btn {
+  flex-shrink: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--black-soft);
+  background: var(--white);
+  border: 1px solid var(--gray-line);
+  border-radius: 999px;
+  padding: 6px 14px;
+}
+
+.sync-btn:hover {
+  border-color: var(--black);
+  color: var(--black);
+}
+
+.sync-code-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.sync-code {
+  flex: 1;
+  font-family: ui-monospace, "SFMono-Regular", monospace;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  background: var(--gray);
+  border-radius: 8px;
+  padding: 10px 12px;
+  text-align: center;
+}
+
+.sync-join-row {
+  display: flex;
+  gap: 8px;
+  margin: 14px 0 4px;
+}
+
+.sync-join-row input {
+  flex: 1;
+  border: 1px solid var(--gray-line);
+  border-radius: var(--radius);
+  padding: 8px 12px;
+  background: var(--gray);
+  color: var(--black);
+  font-family: inherit;
+  font-size: 14px;
+  text-transform: uppercase;
+}
+
+.sync-join-row input:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: var(--white);
 }
 
 .today-date {

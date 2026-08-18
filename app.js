@@ -1,4 +1,25 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getFirestore,
+  doc,
+  setDoc,
+  onSnapshot,
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCfGsQuQRlbUTRWDo5RJQwL9NdT1C_yFjc",
+  authDomain: "my-todo-960ac.firebaseapp.com",
+  projectId: "my-todo-960ac",
+  storageBucket: "my-todo-960ac.firebasestorage.app",
+  messagingSenderId: "447793022218",
+  appId: "1:447793022218:web:8cca8d2cfb14f8b57526f3",
+};
+const firebaseApp = initializeApp(firebaseConfig);
+const db = getFirestore(firebaseApp);
+
 const STORAGE_KEY = "todo-app-state-v1";
+const SYNC_ID_KEY = "todo-sync-id-v1";
+const SYNC_CODE_CHARS = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
 
 function loadState() {
   try {
@@ -16,6 +37,57 @@ function loadState() {
 
 function saveState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  if (syncId) {
+    setDoc(syncDocRef(), { todos: state.todos, dumps: state.dumps }).catch(() => {
+      if (syncStatusEl) syncStatusEl.textContent = "동기화 실패 (오프라인이거나 규칙 설정이 필요해요)";
+    });
+  }
+}
+
+function makeSyncId() {
+  let id = "";
+  for (let i = 0; i < 10; i++) {
+    id += SYNC_CODE_CHARS[Math.floor(Math.random() * SYNC_CODE_CHARS.length)];
+  }
+  return id;
+}
+
+function syncDocRef() {
+  return doc(db, "todoLists", syncId);
+}
+
+function initSync() {
+  const isNewDevice = !syncId;
+  if (isNewDevice) {
+    syncId = makeSyncId();
+    localStorage.setItem(SYNC_ID_KEY, syncId);
+    setDoc(syncDocRef(), { todos: state.todos, dumps: state.dumps }).catch(() => {});
+  }
+  if (syncCodeDisplay) syncCodeDisplay.textContent = syncId;
+
+  onSnapshot(
+    syncDocRef(),
+    (snap) => {
+      if (snap.metadata.hasPendingWrites) return;
+      const data = snap.data();
+      if (!data) return;
+      state = {
+        todos: Array.isArray(data.todos) ? data.todos : [],
+        dumps: Array.isArray(data.dumps) ? data.dumps : [],
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      render();
+      if (syncStatusEl) syncStatusEl.textContent = "동기화됨";
+    },
+    () => {
+      if (syncStatusEl) syncStatusEl.textContent = "동기화 실패 (오프라인이거나 규칙 설정이 필요해요)";
+    }
+  );
+}
+
+function joinSync(newId) {
+  localStorage.setItem(SYNC_ID_KEY, newId);
+  location.reload();
 }
 
 function makeId() {
@@ -23,6 +95,7 @@ function makeId() {
 }
 
 let state = loadState();
+let syncId = localStorage.getItem(SYNC_ID_KEY);
 let pendingDumpId = null;
 let editingTodoId = null;
 let expandedMemoIds = new Set();
@@ -50,6 +123,14 @@ const modalDumpText = document.getElementById("modalDumpText");
 const modalDateInput = document.getElementById("modalDateInput");
 const modalCancel = document.getElementById("modalCancel");
 const modalConfirm = document.getElementById("modalConfirm");
+const syncBtn = document.getElementById("syncBtn");
+const syncModal = document.getElementById("syncModal");
+const syncCodeDisplay = document.getElementById("syncCodeDisplay");
+const syncCopyBtn = document.getElementById("syncCopyBtn");
+const syncStatusEl = document.getElementById("syncStatus");
+const syncJoinInput = document.getElementById("syncJoinInput");
+const syncJoinBtn = document.getElementById("syncJoinBtn");
+const syncCloseBtn = document.getElementById("syncCloseBtn");
 
 function dateOnly(d) {
   return new Date(d.getFullYear(), d.getMonth(), d.getDate());
@@ -723,6 +804,49 @@ tabs.addEventListener("click", (e) => {
   switchTab(btn.dataset.tab);
 });
 
+function openSyncModal() {
+  syncCodeDisplay.textContent = syncId || "";
+  syncStatusEl.textContent = syncId ? "동기화 중…" : "";
+  syncJoinInput.value = "";
+  syncModal.classList.remove("hidden");
+}
+
+function closeSyncModal() {
+  syncModal.classList.add("hidden");
+}
+
+syncBtn.addEventListener("click", openSyncModal);
+syncCloseBtn.addEventListener("click", closeSyncModal);
+syncModal.addEventListener("click", (e) => {
+  if (e.target === syncModal) closeSyncModal();
+});
+
+syncCopyBtn.addEventListener("click", () => {
+  if (!syncId) return;
+  navigator.clipboard
+    .writeText(syncId)
+    .then(() => {
+      syncCopyBtn.textContent = "복사됨";
+      setTimeout(() => (syncCopyBtn.textContent = "복사"), 1500);
+    })
+    .catch(() => {});
+});
+
+syncJoinBtn.addEventListener("click", () => {
+  const val = syncJoinInput.value.trim().toUpperCase();
+  if (!val) return;
+  if (val === syncId) return;
+  joinSync(val);
+});
+
+syncJoinInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    syncJoinBtn.click();
+  }
+});
+
 renderTodayHeader();
 render();
 switchTab(localStorage.getItem(TAB_STORAGE_KEY) === "dump" ? "dump" : "todo");
+initSync();
