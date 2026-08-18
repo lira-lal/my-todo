@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>할 일 정리</title>
+<meta name="theme-color" content="#151515">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="할일정리">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.css" />
+<link rel="stylesheet" href="style.css?v=5">
+</head>
+<body>
+  <div class="app">
+    <header class="app-header">
+      <p class="today-date" id="todayDate"></p>
+    </header>
+
+    <nav class="tabs" id="tabs">
+      <button type="button" class="tab-btn active" data-tab="todo">할 일</button>
+      <button type="button" class="tab-btn" data-tab="dump">생각 모음</button>
+    </nav>
+
+    <main class="layout">
+      <section class="panel todo-panel" data-panel="todo">
+        <form id="todoForm" class="todo-form">
+          <input type="text" id="todoInput" placeholder="할 일을 입력하세요" required>
+          <input type="date" id="todoDate">
+          <button type="submit" class="btn-primary">추가</button>
+        </form>
+
+        <div id="todoGroups" class="todo-groups"></div>
+      </section>
+
+      <section class="panel dump-panel hidden" data-panel="dump">
+        <div class="panel-head">
+          <h2>생각 덤프</h2>
+          <p class="hint">정리 안 된 생각을 일단 여기 던져두세요</p>
+        </div>
+        <form id="dumpForm" class="dump-form">
+          <textarea id="dumpInput" placeholder="떠오르는 대로 적어보세요…" rows="2"></textarea>
+          <button type="submit" class="btn-primary">담기</button>
+        </form>
+        <ul id="dumpList" class="dump-list"></ul>
+      </section>
+    </main>
+  </div>
+
+  <div id="dateModal" class="modal hidden">
+    <div class="modal-card">
+      <h3>언제 할까요?</h3>
+      <p class="modal-text" id="modalDumpText"></p>
+      <input type="date" id="modalDateInput">
+      <div class="modal-actions">
+        <button id="modalCancel" class="btn-secondary" type="button">취소</button>
+        <button id="modalConfirm" class="btn-primary" type="button">일정으로 전환</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("sw.js").catch(() => {});
+      });
+    }
+  </script>
+</body>
+</html>
